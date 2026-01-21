@@ -37,7 +37,7 @@ public function setUsuarioId($value)
 public function selectUsuarios($usuario ='')
 {
   $dao = new Dao();
-  return $result = $dao->select_usuario($usuario);   
+  return $dao->select_usuario($usuario);   
 }
 
 }

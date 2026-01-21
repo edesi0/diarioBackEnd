@@ -77,7 +77,7 @@ class Dao
     try {
       $this->conn = new mysqli($this->host, $this->usuario, $this->senha, $this->database);
     } catch (Exception $e) {
-      echo (json_encode(["sucesso" => false, "msg" => "nao foi possivel conectar ao banco de dados"]));
+      echo (json_encode(["sucesso" => false, "msg" => "nao foi possivel conectar ao banco de dados " .$e]));
       exit;
     }
   }
