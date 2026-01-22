@@ -1,5 +1,5 @@
 <?php
-include_once __DIR__ . ('../../controller/Usuario/classUsuario.php');
+include_once __DIR__ . ('../../controller/classUsuario.php');
 //Verificação de Segurança
 $url = $_SERVER["PHP_SELF"];
 
@@ -82,27 +82,54 @@ class Dao
     }
   }
 
-  public function select_usuario($usuario = '')
-  {
-    $sql = "select * from usuarios ";
+  public function select_usuario(string $usuario = ''): string
+{
+  $sql = "SELECT * FROM usuarios";
+  $params = null;
 
-    if (!empty($usuario)) {
-      $sql = $sql . " where usuario like (?%)";
-      $this->stm = $this->conn->prepare($sql);
-      $this->stm->bind_param("s", $sql);
-    } else {
-      $this->stm = $this->conn->prepare($sql);
-    }
-
-
-    try {
-      $this->stm->execute();
-    } catch (Exception $e) {
-      echo (json_encode(["sucesso" => false, "msg" => "Erro ao buscar os usuarios!"]));
-      exit;
-    }
-
-    $result = $this->stm->get_result();
-    return $result;
+  if ($usuario !== '') {
+    $sql .= " WHERE usuario LIKE ?";          // placeholder correto
+    $params = $usuario . "%";                 // ou "%{$usuario}%" se quiser "contém"
   }
+
+  $stmt = $this->conn->prepare($sql);
+  if (!$stmt) {
+    return json_encode([
+      "sucesso" => false,
+      "msg" => "Erro no prepare: " . $this->conn->error
+    ], JSON_UNESCAPED_UNICODE);
+  }
+
+  if ($params !== null) {
+    $stmt->bind_param("s", $params);          // bind no valor, não no $sql
+  }
+
+  if (!$stmt->execute()) {
+    return json_encode([
+      "sucesso" => false,
+      "msg" => "Erro ao executar: " . $stmt->error
+    ], JSON_UNESCAPED_UNICODE);
+  }
+
+  $result = $stmt->get_result();
+  if (!$result) {
+    return json_encode([
+      "sucesso" => false,
+      "msg" => "get_result indisponível (mysqlnd). Erro: " . $stmt->error
+    ], JSON_UNESCAPED_UNICODE);
+  }
+
+  $rows = [];
+  while ($row = $result->fetch_assoc()) {
+    $rows[] = $row;
+  }
+
+  $stmt->close();
+
+  return json_encode([
+    "sucesso" => true,
+    "data" => $rows
+  ], JSON_UNESCAPED_UNICODE);
+}
+
 }

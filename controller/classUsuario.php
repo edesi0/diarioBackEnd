@@ -1,5 +1,14 @@
 <?php
-include_once __DIR__ .('../../../model/Dao.php');
+include_once __DIR__.('../../model/dao.php');
+
+//Verificação de Segurança
+$url = $_SERVER["PHP_SELF"];
+
+if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) {
+  header("Location: ../index.php");
+  exit;
+}
+
 
 Class Usuario{
 
